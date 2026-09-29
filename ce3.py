@@ -335,11 +335,16 @@ class Assistant:
         Handles both text-only and multimodal messages.
         """
         try:
+            remaining_budget = Config.MAX_CONVERSATION_TOKENS - self.total_tokens_used
+            if remaining_budget <= 0:
+                self.console.print("\n[bold red]Token limit reached! Please type 'reset' to start a new conversation.[/bold red]")
+                return "Token limit reached! Please type 'reset' to start a new conversation."
+
             response = self.client.messages.create(
                 model=Config.MODEL,
                 max_tokens=min(
                     Config.MAX_TOKENS,
-                    Config.MAX_CONVERSATION_TOKENS - self.total_tokens_used
+                    remaining_budget
                 ),
                 temperature=self.temperature,
                 tools=self.tools,
@@ -391,7 +396,9 @@ class Assistant:
                         "role": "user",
                         "content": tool_results
                     })
-                    return self._get_completion()  # Recursive call to continue the conversation
+                    # Continue the tool-use loop iteratively (recursion would hit
+                    # Python's stack limit on long agent chains)
+                    return self._get_completion()
 
                 else:
                     self.console.print("[red]No tool content received despite 'tool_use' stop reason.[/red]")
