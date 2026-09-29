@@ -46,7 +46,7 @@ class ToolCreatorTool(BaseTool):
         """Strip a single outer Markdown code fence from generated Python."""
         cleaned = tool_code.strip()
         fenced_match = re.fullmatch(
-            r"```(?:python|py)?\\s*\\n?(.*?)\\n?```",
+            r"```(?:python|py)?\s*\n?(.*?)\n?```",
             cleaned,
             flags=re.DOTALL | re.IGNORECASE,
         )
